@@ -21,11 +21,17 @@ class Bot:
         super().__init__(**options)
         self.load_distributor = load_distributor
         self.perm_manager = perm_manager
-        instance = Suisha(activity=discord.Activity(name='Dr', type=discord.ActivityType.custom))
+        instance = Ymir()
 
-        @instance.event
-        async def on_ready():
-            print(f'{instance.user} online')
+        # @instance.event
+        # async def on_connect():
+        #     if instance.auto_sync_commands:
+        #         await instance.sync_commands(commands=[],guild_ids=[1174155318029209680])
+        #     print(f"{instance.user.name} connected.")
+
+        # @instance.event
+        # async def on_ready():
+        #     print(f'{instance.user} online')
 
         params = config.config['command_params']
 
@@ -41,7 +47,7 @@ class Bot:
                 'sampler_index': ('sampler', params['default_sampler']),
                 'enable_hr': ('highres_fix', False)
             }
-            cmd_parts = ['/dream']
+            cmd_parts = ['/generate']
             for item in queue_obj.args.items():
                 if item[0] in maps:
                     # don't append if value is default
@@ -67,7 +73,7 @@ class Bot:
             else:
                 await ctx.respond("finished switching to "+model)
 
-        @instance.slash_command(name="dream", description="Generate an image")
+        @instance.slash_command(name="generate", description="Generate an image", guild_ids=[1174155318029209680])
         @option('prompt', str, description='The prompt for generating the image', required=True)
         @option('negative_prompt', str, description='', required=False)
         @option('height', int, description='Image Height', required=False,
@@ -129,7 +135,7 @@ class Bot:
 
             if response == Status.QUEUED:
                 await ctx.respond(
-                    f'`Generating for {ctx.author.name}#{ctx.author.discriminator}` - `Queue Position: {info}` - `command: {stringify(queue_obj).replace("`", "")}`')
+                    f'`Generating for {ctx.author.name}#{ctx.author.discriminator}` - `Queue Position: {info}` ・ Please give it like 5-80 seconds')
             elif response == Status.IN_QUEUE:
                 embed = discord.Embed(title='Already in queue!',
                                       description=f'Please wait for your current image to finish generating before generating a new image\n'
@@ -145,7 +151,7 @@ class Bot:
         instance.run(token)
 
 
-class Suisha(discord.Bot, ABC):
+class Ymir(discord.Bot, ABC):
     def __init__(self, *args, **options):
         super().__init__(*args, **options)
 
@@ -153,8 +159,8 @@ class Suisha(discord.Bot, ABC):
         if message.channel.type.name != 'private':
             if message.author == self.user:
                 try:
-                    # Check if the message from Shanghai was actually a generation
-                    if message.embeds[0].fields[0].name == 'Prompt':
+                    # Check if the message from Ymir was actually a generation
+                    if message.embeds[0].description == 'Enjoy!':
                         await message.add_reaction('❌')
                 except:
                     pass

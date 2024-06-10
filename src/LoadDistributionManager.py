@@ -1,3 +1,4 @@
+import os
 import base64
 import io
 import time
@@ -20,7 +21,7 @@ def _worker(queue, ip, config):
             if queue:
                 try:
                     start_time = time.time()
-                    queue_obj = queue.popleft()
+                    queue_obj = queue[0]  # Peek at the first item in the queue without popping it
                     response, status_code = webui.txt_to_img(queue_obj)
                     if status_code != 200:
                         embed = discord.Embed(title='Encountered an error: ',
@@ -28,21 +29,7 @@ def _worker(queue, ip, config):
                                               color=0xff0000)
                         queue_obj.event_loop.create_task(queue_obj.ctx.channel.send(embed=embed))
                         continue
-                    embed = discord.Embed()
-                    params = response['parameters']
-                    embed.add_field(name='Prompt', value=params['prompt'])
-                    embed.add_field(name='Negative Prompt', value=params['negative_prompt'])
-                    embed.add_field(name='Steps', value=params['steps'])
-                    if params['height'] != config.config['command_params']['default_height']\
-                            or params['width'] != config.config['command_params']['default_width']:
-                        embed.add_field(name='Height', value=params['height'])
-                        embed.add_field(name='Width', value=params['width'])
-                    embed.add_field(name='Sampler', value=params['sampler_index'])
-                    embed.add_field(name='Seed', value=json.loads(response['info'])['seed'])
-                    if params['cfg_scale'] != config.config['command_params']['default_cfg']:
-                        embed.add_field(name='CFG Scale', value=params['cfg_scale'])
-                    if params['enable_hr']:
-                        embed.add_field(name='Highres Fix', value='True')
+                    embed = discord.Embed(description="Enjoy!", color=0xFFFFE0)
                     if queue_obj.ctx.author.avatar is None:
                         embed.set_footer(
                             text=f'{queue_obj.ctx.author.name}#{queue_obj.ctx.author.discriminator}'
@@ -56,14 +43,30 @@ def _worker(queue, ip, config):
                                  f'   |   react with ❌ to delete',
                             icon_url=queue_obj.ctx.author.avatar.url
                         )
-                    image = None
-                    for i in response['images']:
+                    for index, i in enumerate(response['images']):
+                        count = 1
+                        image_path = f'images/{queue_obj.ctx.author.id}_{index+1}_{count}.png'
+                        
+                        # Find a unique file name for each image
+                        while os.path.exists(image_path):
+                            count += 1
+                            image_path = f'images/{queue_obj.ctx.author.id}_{index+1}_{count}.png'
+
+                        # Decode and save the image
                         image = io.BytesIO(base64.b64decode(i.split(",", 1)[0]))
-                    queue_obj.event_loop.create_task(queue_obj.ctx.channel.send(
-                        content=f'<@{queue_obj.ctx.author.id}>',
-                        file=discord.File(fp=image, filename='image.png'),
-                        embed=embed
-                    ))
+                        with open(image_path, 'wb') as f:
+                            f.write(image.getvalue())
+
+                        # Send the image
+                        queue_obj.event_loop.create_task(queue_obj.ctx.channel.send(
+                            content=f'<@{queue_obj.ctx.author.id}>',
+                            file=discord.File(fp=image_path, filename=f'image_{index+1}.png'),
+                            embed=embed
+                        ))
+                    
+                    # Pop the queue only after processing is successful
+                    queue.popleft()
+
                 except:
                     tb = traceback.format_exc()
                     # check if the queue object was retrieved before the error
@@ -80,7 +83,6 @@ def _worker(queue, ip, config):
             time.sleep(1)
     else:
         print('Connection to webui', ip, 'failed')
-
 
 class Status(Enum):
     QUEUED = 0
