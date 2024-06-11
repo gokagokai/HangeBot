@@ -58,7 +58,7 @@ class Bot:
         @option('model', str, description='model to switch to', required=True, choices=params['models'])
         async def model(ctx, *, model: str):
             webui = AutoWebUi.WebUi("http://127.0.0.1:7860/")
-            print(f'Request -- {ctx.author.name}#{ctx.author.discriminator} -- change model to {model}')
+            print(f'Request -- {ctx.author.name} -- change model to {model}')
             queue_obj = AutoWebUi.QueueObj(
                 event_loop=asyncio.get_event_loop(),
                 ctx=ctx,
@@ -97,17 +97,43 @@ class Bot:
                                     color=0xEECCAA)
                 await ctx.respond(embed=embed, ephemeral=True)
                 return
+            
             # Check for banned words
             search = prompt if config.config['blacklist']['allow_in_negative'] else ' '.join([prompt, negative_prompt])
             for word in config.config['blacklist']['words']:
                 # remove punctuation from the prompt before searching
                 for word2 in search.translate(str.maketrans('', '', string.punctuation)).split():
                     if word.lower() == word2.lower():
-                        print(f'Denied -- {ctx.author.name}#{ctx.author.discriminator} tried to use banned word {word}!')
-                        await ctx.respond(f'You tried to use a banned word! ({word})', ephemeral=True)
+                        print(f'Denied -- {ctx.author.name} tried to use banned word: {word}')
+                        await ctx.respond(f'You tried to use a banned word.\n `Word: {word}`', ephemeral=True)
                         return
+
+            # Prevent randomness from going wild when short prompt
+            if len(prompt) <= 20:
+                if negative_prompt:
+                    negative_prompt += ', ' + ', '.join(config.config['blacklist']['words'])
+                else:
+                    negative_prompt = ', '.join(config.config['blacklist']['words'])
+
+            # Check for banned nsfw words
+            if str(ctx.channel.id) not in config.config['blacklist']['nsfw_channels']:
+                for word in config.config['blacklist']['nsfw_words']:
+                    # remove punctuation from the prompt before searching
+                    for word2 in search.translate(str.maketrans('', '', string.punctuation)).split():
+                        if word.lower() == word2.lower():
+                            print(f'Denied -- {ctx.author.name} tried to use banned nsfw word: {word}')
+                            await ctx.respond(f'Chill bro keep it Sfw.\n `Word: {word}`', ephemeral=True)
+                            return
+                
+                # Prevent randomness from going wild when short prompt
+                if len(prompt) <= 20:
+                    if negative_prompt:
+                        negative_prompt += ', ' + ', '.join(config.config['blacklist']['nsfw_words'])
+                    else:
+                        negative_prompt = ', '.join(config.config['blacklist']['nsfw_words'])
+
             # Process request
-            print(f'Request -- {ctx.author.name}#{ctx.author.discriminator} -- Prompt: {prompt}')
+            print(f'Request -- {ctx.author.name} -- Prompt: {prompt}')
             width, height = aspect_ratios[aspect_ratio]
             queue_obj = AutoWebUi.QueueObj(
                 event_loop=asyncio.get_event_loop(),

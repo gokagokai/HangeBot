@@ -29,7 +29,11 @@ models = ['abyssorangemix3AOM3_aom3a3.safetensors [eb4099ba9c]', 'deliberate_v11
 default_sampler = 'Euler a'
 
 [blacklist] # blacklisted generation words
-words = []
+words = ['loli', 'shota', 'child', 'children']
+
+nsfw_channels = ['1249359906746929254']
+nsfw_words = ['nsfw', 'nude', 'naked', 'pussy', 'vagina', 'dick', 'cock', 'penis', 'creampie', 'cum', 'erection', 'ejaculation', 'sex', 'vaginal', 'milf', 'ahegao', 'nipples']
+
 allow_in_negative = true # allow blacklisted words in negative prompt
 
 [aspect_ratios] # Image Aspect Ratios
