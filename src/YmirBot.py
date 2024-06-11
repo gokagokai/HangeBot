@@ -44,8 +44,7 @@ class Bot:
                 'height': ('height', params['default_height']),
                 'seed': ('seed', -1),
                 'cfg_scale': ('guidance_scale', params['default_cfg']),
-                'sampler_index': ('sampler', params['default_sampler']),
-                'enable_hr': ('highres_fix', False)
+                'sampler_index': ('sampler', params['default_sampler'])
             }
             cmd_parts = ['/generate']
             for item in queue_obj.args.items():
@@ -81,12 +80,10 @@ class Bot:
         @option('width', int, description='Image Width', required=False,
                 choices=[x for x in range(params['min_width'], params['max_width'] + 64, 64)])
         @option('steps', int, description='Sampling Steps', required=False,
-                choices=[x for x in
-                         range(params['min_steps'], params['max_steps'] + params['step_step'], params['step_step'])])
+                min_value=params['min_steps'], max_value=params['max_steps'])
         @option('seed', int, description='Image seed', required=False)
         @option('guidance_scale', float, description='CFG scale', required=False)
         @option('sampler', str, description='Sampling method', required=False, choices=params['samplers'])
-        @option('highres_fix', bool, description='Highres Image Fix', required=False)
         async def generate(ctx, *, prompt: str,
                            negative_prompt: Optional[str] = params['default_negative'],
                            height: Optional[int] = params['default_height'],
@@ -94,8 +91,7 @@ class Bot:
                            steps: Optional[int] = params['default_steps'],
                            seed: Optional[int] = -1,
                            guidance_scale: Optional[float] = params['default_cfg'],
-                           sampler: Optional[str] = params['default_sampler'],
-                           highres_fix: Optional[bool] = False):
+                           sampler: Optional[str] = params['default_sampler']):
             # Check DM access perms
             if ctx.channel.type.name == 'private':
                 perm_manager.can_dm(ctx.author)
@@ -126,8 +122,7 @@ class Bot:
                     'height': height,
                     'seed': seed,
                     'cfg_scale': guidance_scale,
-                    'sampler_index': sampler,
-                    'enable_hr': highres_fix
+                    'sampler_index': sampler
                 }
             )
 
@@ -135,7 +130,7 @@ class Bot:
 
             if response == Status.QUEUED:
                 await ctx.respond(
-                    f'`Generating for {ctx.author.name}#{ctx.author.discriminator}` - `Queue Position: {info}` ・ Please give it like 5-80 seconds')
+                    f'`Generating for {ctx.author.name}#{ctx.author.discriminator}` - `Queue Position: {info}`')
             elif response == Status.IN_QUEUE:
                 embed = discord.Embed(title='Already in queue!',
                                       description=f'Please wait for your current image to finish generating before generating a new image\n'

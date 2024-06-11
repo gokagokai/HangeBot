@@ -11,7 +11,7 @@ ALL = false # gives all users DM access
 
 [command_params]
 default_negative = 'score_4, score_5, score_6,  score_3, score_2, score_1, simple background, lowres, low detail, blurry, watercolor, muscular female, bad anatomy, bad proportions, deformed, deformed anatomy, deformed fingers,logo,text,english text,patreon username,patreon logo, deformed anatomy,deformed fingers,monochrome,photo,hyperrealistic,realstic,skinny,rough sketch,fewer digits,extra digits,signature,artist name,mosaic,missing fingers,3d,too many fingers,mutated hands, source_pony, source_furry, source_cartoon,bad hands, worst quality, low quality, extra legs, deformed anatomy, messy color, 3d, distracted, jpeg artifacts, comic'
-default_cfg = 7
+default_cfg = 3
 
 default_width = 896
 min_width = 512
@@ -21,10 +21,9 @@ default_height = 1152
 min_height = 512
 max_height = 1408
 
-default_steps = 25
+default_steps = 14
 min_steps = 5
 max_steps = 50
-step_step = 5
 
 samplers = [
             'Euler a', 'Euler', 'LMS', 'Heun', 'DPM2', 'DPM2 a', 'DPM++ 2S a', 'DPM++ 2M', 'DPM++ SDE', 'DPM fast',
