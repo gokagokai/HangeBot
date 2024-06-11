@@ -33,6 +33,15 @@ class WebUi:
         r = response.json()
         return r, response.status_code
 
+    def get_progress(self):
+        endpoint = urljoin(self._base_url, '/sdapi/v1/progress?skip_current_image=false')
+        try:
+            response = requests.get(endpoint)
+            r = response.json()
+            return r, response.status_code
+        except requests.RequestException:
+            return None, 500
+        
     def heartbeat(self):
         endpoint = urljoin(self._base_url, '/user/')
         try:

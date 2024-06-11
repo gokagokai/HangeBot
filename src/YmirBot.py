@@ -128,12 +128,12 @@ class Bot:
 
             if response == Status.QUEUED:
                 await ctx.respond(
-                    f'`Generating for {ctx.author.name}#{ctx.author.discriminator}` - `Queue Position: {info}`')
+                    f'`Queue Position: {info}`')
             elif response == Status.IN_QUEUE:
-                embed = discord.Embed(title='Already in queue!',
-                                      description=f'Please wait for your current image to finish generating before generating a new image\n'
-                                                  f'Your position: {info + 1}',
-                                      color=0xDD0000)
+                embed = discord.Embed(
+                                      description=f'**Chill bro I only have 1 GPU**.\n'
+                                                  f'`Your Position: {info + 1}`',
+                                      color=0xFFD700)
                 await ctx.respond(embed=embed, ephemeral=True)
             else:
                 embed = discord.Embed(title='Encountered an error: ',
