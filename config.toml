@@ -13,17 +13,11 @@ ALL = false # gives all users DM access
 default_negative = 'score_4, score_5, score_6,  score_3, score_2, score_1, simple background, lowres, low detail, blurry, watercolor, muscular female, bad anatomy, bad proportions, deformed, deformed anatomy, deformed fingers,logo,text,english text,patreon username,patreon logo, deformed anatomy,deformed fingers,monochrome,photo,hyperrealistic,realstic,skinny,rough sketch,fewer digits,extra digits,signature,artist name,mosaic,missing fingers,3d,too many fingers,mutated hands, source_pony, source_furry, source_cartoon,bad hands, worst quality, low quality, extra legs, deformed anatomy, messy color, 3d, distracted, jpeg artifacts, comic'
 default_cfg = 3
 
-default_width = 896
-min_width = 512
-max_width = 1664
-
-default_height = 1152
-min_height = 512
-max_height = 1408
+default_ratio = '7:9'
 
 default_steps = 14
 min_steps = 5
-max_steps = 50
+max_steps = 30
 
 samplers = [
             'Euler a', 'Euler', 'LMS', 'Heun', 'DPM2', 'DPM2 a', 'DPM++ 2S a', 'DPM++ 2M', 'DPM++ SDE', 'DPM fast',
@@ -37,3 +31,28 @@ default_sampler = 'Euler a'
 [blacklist] # blacklisted generation words
 words = []
 allow_in_negative = true # allow blacklisted words in negative prompt
+
+[aspect_ratios] # Image Aspect Ratios
+'1:2' = [704, 1408]
+'11:21' = [704, 1344]
+'4:7' = [768, 1344]
+'3:5' = [768, 1280]
+'13:19' = [832, 1216]
+'13:18' = [832, 1152]
+'7:9' = [896, 1152]
+'14:17' = [896, 1088]
+'15:17' = [960, 1088]
+'15:16' = [960, 1024]
+'17:15' = [1088, 960]
+'17:14' = [1088, 896]
+'9:7' = [1152, 896]
+'18:13' = [1152, 832]
+'19:13' = [1216, 832]
+'5:3' = [1280, 768]
+'7:4' = [1344, 768]
+'21:11' = [1344, 704]
+'2:1' = [1408, 704]
+'23:11' = [1472, 704]
+'12:5' = [1536, 640]
+'5:2' = [1600, 640]
+'26:9' = [1664, 576]

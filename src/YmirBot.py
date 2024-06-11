@@ -34,14 +34,14 @@ class Bot:
         #     print(f'{instance.user} online')
 
         params = config.config['command_params']
+        aspect_ratios = config.config['aspect_ratios']
 
         def stringify(queue_obj):
             maps = {
                 'prompt': ('prompt', None),
                 'negative_prompt': ('negative_prompt', params['default_negative']),
                 'steps': ('steps', params['default_steps']),
-                'width': ('width', params['default_width']) ,
-                'height': ('height', params['default_height']),
+                'aspect_ratio': ('aspect_ratio', params['default_ratio']),
                 'seed': ('seed', -1),
                 'cfg_scale': ('guidance_scale', params['default_cfg']),
                 'sampler_index': ('sampler', params['default_sampler'])
@@ -53,7 +53,7 @@ class Bot:
                     if item[1] != maps[item[0]][1]:
                         cmd_parts.append(f'{maps[item[0]][0]}: {item[1]}')
             return ' '.join(cmd_parts)
-
+        
         @instance.slash_command(name="model", description="switch model")
         @option('model', str, description='model to switch to', required=True, choices=params['models'])
         async def model(ctx, *, model: str):
@@ -75,10 +75,8 @@ class Bot:
         @instance.slash_command(name="generate", description="Generate an image", guild_ids=[1174155318029209680])
         @option('prompt', str, description='The prompt for generating the image', required=True)
         @option('negative_prompt', str, description='', required=False)
-        @option('height', int, description='Image Height', required=False,
-                choices=[x for x in range(params['min_height'], params['max_height'] + 64, 64)])
-        @option('width', int, description='Image Width', required=False,
-                choices=[x for x in range(params['min_width'], params['max_width'] + 64, 64)])
+        @option('aspect_ratio', str, description='Image Aspect Ratio', required=False,
+                choices=list(aspect_ratios.keys()))
         @option('steps', int, description='Sampling Steps', required=False,
                 min_value=params['min_steps'], max_value=params['max_steps'])
         @option('seed', int, description='Image seed', required=False)
@@ -86,8 +84,7 @@ class Bot:
         @option('sampler', str, description='Sampling method', required=False, choices=params['samplers'])
         async def generate(ctx, *, prompt: str,
                            negative_prompt: Optional[str] = params['default_negative'],
-                           height: Optional[int] = params['default_height'],
-                           width: Optional[int] = params['default_width'],
+                           aspect_ratio: Optional[str] = params['default_ratio'],
                            steps: Optional[int] = params['default_steps'],
                            seed: Optional[int] = -1,
                            guidance_scale: Optional[float] = params['default_cfg'],
@@ -96,8 +93,8 @@ class Bot:
             if ctx.channel.type.name == 'private':
                 perm_manager.can_dm(ctx.author)
                 embed = discord.Embed(title='DM Access Disabled',
-                                      description=f'You do not have permission to DM the bot',
-                                      color=0xEECCAA)
+                                    description=f'You do not have permission to DM the bot',
+                                    color=0xEECCAA)
                 await ctx.respond(embed=embed, ephemeral=True)
                 return
             # Check for banned words
@@ -111,6 +108,7 @@ class Bot:
                         return
             # Process request
             print(f'Request -- {ctx.author.name}#{ctx.author.discriminator} -- Prompt: {prompt}')
+            width, height = aspect_ratios[aspect_ratio]
             queue_obj = AutoWebUi.QueueObj(
                 event_loop=asyncio.get_event_loop(),
                 ctx=ctx,
