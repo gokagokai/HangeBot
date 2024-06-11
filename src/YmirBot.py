@@ -153,7 +153,7 @@ class Ymir(discord.Bot, ABC):
             if message.author == self.user:
                 try:
                     # Check if the message from Ymir was actually a generation
-                    if message.embeds[0].description == 'Enjoy!':
+                    if message.embeds[0].description == '**Enjoy!**':
                         await message.add_reaction('❌')
                 except:
                     pass
@@ -166,5 +166,5 @@ class Ymir(discord.Bot, ABC):
             message = await message.fetch_message(ctx.message_id)
             if message.embeds:
                 # look at the message footer to see if the generation was by the user who reacted
-                if f'{ctx.member.name}#{ctx.member.discriminator}' in message.embeds[0].footer.text:
+                if f'{ctx.member.name}' in message.embeds[0].footer.text:
                     await message.delete()
