@@ -1,3 +1,7 @@
+prefix = 'h!'
+mod_role_ids = [1176210082585919570, 1229109645134663690, 1216850704791244914, 1178585102746394666]
+owner_id = 723815216701505606
+
 [webui_ips] # IPs to the instances of automatic webui
 webui1 = 'http://127.0.0.1:7860/'
 
@@ -16,7 +20,7 @@ samplers = [
             'DPM adaptive', 'LMS Karras', 'DPM2 Karras', 'DPM2 a Karras', 'DPM++ 2M Karras', 'DPM++ SDE Karras',
             'DDIM', 'PLMS'
         ]
-models = ['abyssorangemix3AOM3_aom3a3.safetensors [eb4099ba9c]', 'deliberate_v11.safetensors [d8691b4d16]', 'nai.ckpt [89d59c3dde]']
+models = ['']
 
 default_sampler = 'Euler a'
 
@@ -28,7 +32,7 @@ nsfw_words = ['nsfw', 'nude', 'naked', 'pussy', 'vagina', 'dick', 'cock', 'penis
 
 allow_in_negative = true # allow blacklisted words in negative prompt
 
-[aspect_ratios] # Image Aspect Ratios
+[aspect_ratios]
 '1:2' = [704, 1408]
 '11:21' = [704, 1344]
 '4:7' = [768, 1344]

@@ -10,13 +10,13 @@ import asyncio
 
 import discord
 
-from src import AutoWebUi
+from api import AutoWebUi
 
 
 def _worker(queue, ip, config):
     webui = AutoWebUi.WebUi(ip)
     if webui.heartbeat():
-        print('connected to webui at', ip)
+        # print('connected to webui at', ip)
         while True:
             if queue:
                 try:
