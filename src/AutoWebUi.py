@@ -1,8 +1,5 @@
-import base64
-import io
 from urllib.parse import urljoin
 import requests
-from PIL import Image
 
 
 class QueueObj:

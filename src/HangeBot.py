@@ -17,11 +17,10 @@ class Config:
 
 
 class Bot:
-    def __init__(self, token, config, load_distributor, perm_manager, **options):
+    def __init__(self, token, config, load_distributor, **options):
         super().__init__(**options)
         self.load_distributor = load_distributor
-        self.perm_manager = perm_manager
-        instance = Ymir()
+        instance = Hange()
 
         # @instance.event
         # async def on_connect():
@@ -89,14 +88,6 @@ class Bot:
                            seed: Optional[int] = -1,
                            guidance_scale: Optional[float] = params['default_cfg'],
                            sampler: Optional[str] = params['default_sampler']):
-            # Check DM access perms
-            if ctx.channel.type.name == 'private':
-                perm_manager.can_dm(ctx.author)
-                embed = discord.Embed(title='DM Access Disabled',
-                                    description=f'You do not have permission to DM the bot',
-                                    color=0xEECCAA)
-                await ctx.respond(embed=embed, ephemeral=True)
-                return
             
             # Check for banned words
             search = prompt if config.config['blacklist']['allow_in_negative'] else ' '.join([prompt, negative_prompt])
@@ -170,7 +161,7 @@ class Bot:
         instance.run(token)
 
 
-class Ymir(discord.Bot, ABC):
+class Hange(discord.Bot, ABC):
     def __init__(self, *args, **options):
         super().__init__(*args, **options)
 
@@ -178,7 +169,7 @@ class Ymir(discord.Bot, ABC):
         if message.channel.type.name != 'private':
             if message.author == self.user:
                 try:
-                    # Check if the message from Ymir was actually a generation
+                    # Check if the message from Hange was actually a generation
                     if message.embeds[0].description == '**Enjoy!**':
                         await message.add_reaction('❌')
                 except:

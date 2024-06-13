@@ -1,14 +1,6 @@
 [webui_ips] # IPs to the instances of automatic webui
 webui1 = 'http://127.0.0.1:7860/'
 
-[ratelimit_roles] # gens per hour per role, set to -1 to disable ratelimit
-DEFAULT = -1 # ratelimit if no other ratelimit role is found
-# RATE LIMITS DO NOT WORK CURRENTLY
-
-[dm_access_roles] # roles that have DM access perms
-ALL = false # gives all users DM access
-# PER ROLE DM ACCESS DOESN'T WORK CURRENTLY
-
 [command_params]
 default_negative = 'score_4, score_5, score_6,  score_3, score_2, score_1, simple background, lowres, low detail, blurry, watercolor, muscular female, bad anatomy, bad proportions, deformed, deformed anatomy, deformed fingers,logo,text,english text,patreon username,patreon logo, deformed anatomy,deformed fingers,monochrome,photo,hyperrealistic,realstic,skinny,rough sketch,fewer digits,extra digits,signature,artist name,mosaic,missing fingers,3d,too many fingers,mutated hands, source_pony, source_furry, source_cartoon,bad hands, worst quality, low quality, extra legs, deformed anatomy, messy color, 3d, distracted, jpeg artifacts, comic'
 default_cfg = 3
@@ -46,6 +38,7 @@ allow_in_negative = true # allow blacklisted words in negative prompt
 '7:9' = [896, 1152]
 '14:17' = [896, 1088]
 '15:17' = [960, 1088]
+'1:1' = [1024, 1024]
 '15:16' = [960, 1024]
 '17:15' = [1088, 960]
 '17:14' = [1088, 896]

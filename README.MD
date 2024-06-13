@@ -1,6 +1,6 @@
-# Ymir
+# Hange
 
-Ymir is a stable diffusion discord bot.
+Hange is a stable diffusion discord bot.
 ### Features
 Negative prompts, prompt weighting, expanded token input, VAE support, xformers, SD 1.x and 2.x support,
 highres fix support
@@ -19,7 +19,7 @@ Install requirements
 
 `pip install -r requirements.txt`
 
-Ymir uses [Automatic1111's WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) as the backend.
+Hange uses [Automatic1111's WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) as the backend.
 Follow the directions on their repo for setup instructions.
 
 Once you have WebUI set up, run `webui.sh` with the `--api` argument. You can also add other

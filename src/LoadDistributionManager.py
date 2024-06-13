@@ -3,7 +3,6 @@ import base64
 import io
 import time
 import traceback
-import json
 from enum import Enum
 from collections import deque
 from threading import Thread
