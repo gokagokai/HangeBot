@@ -1,4 +1,5 @@
 import asyncio
+import re
 import string
 import discord
 from discord import app_commands
@@ -96,6 +97,18 @@ class Sd(commands.Cog, name="sd"):
         guidance_scale: float = None,
         sampler: str = None
     ):
+        # Remove /generate prompt: from the prompt (Fix common mistake)
+        transformed_prompt = re.sub(r'^/generate prompt:\s*', '', prompt)
+
+        # Transform prompt to replace <:emoji:ID> with :emoji: (Fix for mobile)
+        transformed_prompt = re.sub(r'<:(\w+):\d+>', r':\1:', transformed_prompt)
+
+        error_prompt= False
+        if transformed_prompt != prompt:
+            print(f'--- <Error Prompt>: --- \n{prompt}')
+            prompt = transformed_prompt
+            error_prompt= True
+
         negative_prompt = negative_prompt or config['command_params']['default_negative']
         aspect_ratio = aspect_ratio or config['command_params']['default_ratio']
         steps = steps or config['command_params']['default_steps']
@@ -135,7 +148,7 @@ class Sd(commands.Cog, name="sd"):
                     negative_prompt = ', '.join(config['blacklist']['nsfw_words'])
 
         # Process request
-        print(f'Request -- {ctx.author.name} -- Prompt: {prompt}')
+        print(f'--- <Prompt>: ---\n{prompt}')
         width, height = config['aspect_ratios'][aspect_ratio]
         queue_obj = AutoWebUi.QueueObj(
             event_loop=asyncio.get_event_loop(),
@@ -155,7 +168,10 @@ class Sd(commands.Cog, name="sd"):
         response, info = self.load_distributor.add_to_queue(queue_obj)
 
         if response == LoadDistributionManager.Status.QUEUED:
-            await ctx.send(f'`Queue Position: {info}`')
+            if error_prompt:
+                await ctx.send(f'`Queue Position: {info}` `Auto-Fix Prompt`')
+            else:
+                await ctx.send(f'`Queue Position: {info}`')
         elif response == LoadDistributionManager.Status.IN_QUEUE:
             await ctx.send(f'**Chill bro I only have 1 GPU.**\n `Your Position: {info + 1}`', ephemeral=True)
         else:
