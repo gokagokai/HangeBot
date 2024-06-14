@@ -25,7 +25,7 @@ class Owner(commands.Cog, name="owner"):
             await context.bot.tree.sync()
             embed = discord.Embed(
                 description="Slash commands have been globally synchronized.",
-                color=0xBEBEFE,
+                color=0xFFFFE0,
             )
             await context.send(embed=embed, ephemeral=True)
             return
@@ -34,7 +34,7 @@ class Owner(commands.Cog, name="owner"):
             await context.bot.tree.sync(guild=context.guild)
             embed = discord.Embed(
                 description="Slash commands have been synchronized in this guild.",
-                color=0xBEBEFE,
+                color=0xFFFFE0,
             )
             await context.send(embed=embed, ephemeral=True)
             return
@@ -59,7 +59,7 @@ class Owner(commands.Cog, name="owner"):
             await context.bot.tree.sync()
             embed = discord.Embed(
                 description="Slash commands have been globally unsynchronized.",
-                color=0xBEBEFE,
+                color=0xFFFFE0,
             )
             await context.send(embed=embed, ephemeral=True)
             return
@@ -68,7 +68,7 @@ class Owner(commands.Cog, name="owner"):
             await context.bot.tree.sync(guild=context.guild)
             embed = discord.Embed(
                 description="Slash commands have been unsynchronized in this guild.",
-                color=0xBEBEFE,
+                color=0xFFFFE0,
             )
             await context.send(embed=embed, ephemeral=True)
             return
@@ -94,7 +94,7 @@ class Owner(commands.Cog, name="owner"):
             await context.send(embed=embed, ephemeral=True)
             return
         embed = discord.Embed(
-            description=f"Successfully loaded the `{cog}` cog.", color=0xBEBEFE
+            description=f"Successfully loaded the `{cog}` cog.", color=0xFFFFE0
         )
         await context.send(embed=embed, ephemeral=True)
 
@@ -119,7 +119,7 @@ class Owner(commands.Cog, name="owner"):
             await context.send(embed=embed, ephemeral=True)
             return
         embed = discord.Embed(
-            description=f"Successfully unloaded the `{cog}` cog.", color=0xBEBEFE
+            description=f"Successfully unloaded the `{cog}` cog.", color=0xFFFFE0
         )
         await context.send(embed=embed, ephemeral=True)
 
@@ -144,7 +144,7 @@ class Owner(commands.Cog, name="owner"):
             await context.send(embed=embed, ephemeral=True)
             return
         embed = discord.Embed(
-            description=f"Successfully reloaded the `{cog}` cog.", color=0xBEBEFE
+            description=f"Successfully reloaded the `{cog}` cog.", color=0xFFFFE0
         )
         await context.send(embed=embed, ephemeral=True)
 
@@ -159,7 +159,7 @@ class Owner(commands.Cog, name="owner"):
 
         :param context: The hybrid command context.
         """
-        embed = discord.Embed(description="Shutting down. Bye! :wave:", color=0xBEBEFE)
+        embed = discord.Embed(description="Shutting down. Bye! :wave:", color=0xFFFFE0)
         await context.send(embed=embed, ephemeral=True)
         await self.bot.close()
 

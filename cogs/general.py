@@ -13,7 +13,7 @@ class General(commands.Cog, name="general"):
     @app_commands.describe(ephemeral="Whether or not the help message should be ephemeral.")
     async def help(self, context: Context, ephemeral: bool = False) -> None:
         embed = discord.Embed(
-            title="Help", description="Use either '/' or 's!':", color=0xadd8e6
+            title="Help", description="Use either '/' or 's!':", color=0xFFFFE0
         )
         for i in self.bot.cogs:
             if i == "owner":

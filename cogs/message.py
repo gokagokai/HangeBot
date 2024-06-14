@@ -42,7 +42,7 @@ class Message(commands.Cog, name="message"):
         """
         channel = channel or context.channel
         context_embed = discord.Embed(description="Sent to " + channel.mention, color=0xBEBEFE)
-        message_embed = discord.Embed(description=message, color=0xadd8e6)
+        message_embed = discord.Embed(description=message, color=0xFFFFE0)
         await context.send(embed=context_embed, ephemeral=True)
         await channel.send(embed=message_embed)
         

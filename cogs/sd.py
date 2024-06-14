@@ -1,10 +1,12 @@
 import asyncio
+import base64
 import re
 import string
 import discord
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
+import aiohttp
 
 import toml
 from modules import LoadDistributionManager
@@ -17,8 +19,18 @@ class Sd(commands.Cog, name="sd"):
     def __init__(self, bot) -> None:
         self.bot = bot
         ips = config['webui_ips'].items()
-        ips = [ip[1] for ip in ips]
-        self.load_distributor = LoadDistributionManager.LoadDist(ips, config)
+        self.ips = [ip[1] for ip in ips]
+        self.load_distributor = LoadDistributionManager.LoadDist(self.ips, config)
+        self.session = aiohttp.ClientSession()
+
+    async def cleanup(self):
+        await self.session.close()
+
+    def cog_unload(self):
+        asyncio.create_task(self.cleanup())
+
+    async def cog_reload(self):
+        await self.cleanup()
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -30,7 +42,60 @@ class Sd(commands.Cog, name="sd"):
                         await message.add_reaction('❌')
                 except:
                     pass
+            
+            if message.reference and str(self.bot.user.id) in message.content:
+                original_message = await message.channel.fetch_message(message.reference.message_id)
+                if original_message.attachments:
+                    for attachment in original_message.attachments:
+                        print(attachment.filename)
+                        if attachment.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                            base64_string = await self._download_and_encode_image(attachment.url)
+                            webui = AutoWebUi.WebUi(self.ips[0])
+                            response, _ = webui.get_png_info(base64_string)
+                            await self._send_embed_response(message, response)
 
+    async def _send_embed_response(self, message, response):
+        embed = discord.Embed(color=0xFFFFE0)
+        params = response['parameters']
+        
+        embed.add_field(name='Prompt', value=params['Prompt'])
+        embed.add_field(name='Negative Prompt', value=params['Negative prompt'])
+        embed.add_field(name='Size', value=f"{params['Size-1']}x{params['Size-2']}")
+        embed.add_field(name='Sampler', value=params['Sampler'])
+        embed.add_field(name='Schedule type', value=params['Schedule type'])
+        embed.add_field(name='Steps', value=params['Steps'])
+        embed.add_field(name='CFG Scale', value=params['CFG scale'])
+        embed.add_field(name='Clip skip', value=params['Clip skip'])
+        embed.add_field(name='Seed', value=params['Seed'])
+        embed.add_field(name='Model', value=params['Model'])
+        
+        if message.author.avatar is None:
+            embed.set_footer(
+                text=f'{message.author.name}'
+            )
+        else:
+            embed.set_footer(
+                text=f'{message.author.name}',
+                icon_url=message.author.avatar.url
+            )
+
+        # Send the image reference outside of the embed
+        original_message = await message.channel.fetch_message(message.reference.message_id)
+        if original_message.attachments:
+            for attachment in original_message.attachments:
+                if attachment.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    await message.channel.send(attachment.url)
+
+        await message.channel.send(embed=embed)
+        
+    async def _download_and_encode_image(self, url):
+        async with self.session.get(url) as response:
+            if response.status == 200:
+                image_bytes = await response.read()
+                base64_string = base64.b64encode(image_bytes).decode('utf-8')
+                return base64_string
+            return None
+        
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, ctx):
         if ctx.emoji.name == '❌':
@@ -49,8 +114,8 @@ class Sd(commands.Cog, name="sd"):
     )
     @app_commands.describe(model="Model to switch to")
     async def model(self, ctx: Context, model: str):
-        webui = AutoWebUi.WebUi("http://127.0.0.1:7860/")
-        print(f'Request -- {ctx.author.name} -- change model to {model}')
+        webui = AutoWebUi.WebUi(self.ips[0])
+        print(f'Change model to {model}')
         queue_obj = AutoWebUi.QueueObj(
             event_loop=asyncio.get_event_loop(),
             ctx=ctx,

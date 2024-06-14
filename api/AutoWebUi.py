@@ -39,6 +39,17 @@ class WebUi:
         except requests.RequestException:
             return None, 500
         
+    def get_png_info(self, base64_string):
+        endpoint = urljoin(self._base_url, '/sdapi/v1/png-info')
+        
+        payload = {
+            "image": base64_string
+        }
+        
+        response = requests.post(url=endpoint, json=payload)
+        r = response.json()
+        return r, response.status_code
+    
     def heartbeat(self):
         endpoint = urljoin(self._base_url, '/user/')
         try:
