@@ -47,45 +47,45 @@ class Sd(commands.Cog, name="sd"):
                 original_message = await message.channel.fetch_message(message.reference.message_id)
                 if original_message.attachments:
                     for attachment in original_message.attachments:
-                        print(attachment.filename)
                         if attachment.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
                             base64_string = await self._download_and_encode_image(attachment.url)
                             webui = AutoWebUi.WebUi(self.ips[0])
                             response, _ = webui.get_png_info(base64_string)
-                            await self._send_embed_response(message, response)
+                            await self._send_embed_response(message, response, attachment)
 
-    async def _send_embed_response(self, message, response):
+    async def _send_embed_response(self, message, response, attachment):
         embed = discord.Embed(color=0xFFFFE0)
-        params = response['parameters']
+        params = response.get('parameters', {})
         
-        embed.add_field(name='Prompt', value=params['Prompt'])
-        embed.add_field(name='Negative Prompt', value=params['Negative prompt'])
-        embed.add_field(name='Size', value=f"{params['Size-1']}x{params['Size-2']}")
-        embed.add_field(name='Sampler', value=params['Sampler'])
-        embed.add_field(name='Schedule type', value=params['Schedule type'])
-        embed.add_field(name='Steps', value=params['Steps'])
-        embed.add_field(name='CFG Scale', value=params['CFG scale'])
-        embed.add_field(name='Clip skip', value=params['Clip skip'])
-        embed.add_field(name='Seed', value=params['Seed'])
-        embed.add_field(name='Model', value=params['Model'])
-        
+        if 'Prompt' in params:
+            embed.add_field(name='Prompt', value=params['Prompt'])
+        if 'Negative prompt' in params:
+            embed.add_field(name='Negative Prompt', value=params['Negative prompt'])
+        if 'Sampler' in params:
+            embed.add_field(name='Sampler', value=params['Sampler'])
+        if 'Schedule type' in params:
+            embed.add_field(name='Schedule type', value=params['Schedule type'])
+        if 'Steps' in params:
+            embed.add_field(name='Steps', value=params['Steps'])
+        if 'CFG scale' in params:
+            embed.add_field(name='CFG Scale', value=params['CFG scale'])
+        if 'Clip skip' in params:
+            embed.add_field(name='Clip skip', value=params['Clip skip'])
+        if 'Seed' in params:
+            embed.add_field(name='Seed', value=params['Seed'])
+        if 'Model' in params:
+            embed.add_field(name='Model', value=params['Model'])
+
+        # Add user footer
         if message.author.avatar is None:
-            embed.set_footer(
-                text=f'{message.author.name}'
-            )
+            embed.set_footer(text=f'{message.author.name}')
         else:
             embed.set_footer(
                 text=f'{message.author.name}',
                 icon_url=message.author.avatar.url
             )
 
-        # Send the image reference outside of the embed
-        original_message = await message.channel.fetch_message(message.reference.message_id)
-        if original_message.attachments:
-            for attachment in original_message.attachments:
-                if attachment.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-                    await message.channel.send(attachment.url)
-
+        await message.channel.send(attachment.url)
         await message.channel.send(embed=embed)
         
     async def _download_and_encode_image(self, url):
@@ -162,6 +162,21 @@ class Sd(commands.Cog, name="sd"):
         guidance_scale: float = None,
         sampler: str = None
     ):
+        aspect_ratio = aspect_ratio or config['command_params']['default_ratio']
+        width, height = config['aspect_ratios'][aspect_ratio]
+        await self.generate_base(ctx, prompt, negative_prompt, width, height, steps, seed, guidance_scale, sampler)
+
+    async def generate_base(
+        self, ctx: Context, 
+        prompt: str,
+        negative_prompt: str = None,
+        width: int = None,
+        height: int = None,
+        steps: int = None,
+        seed: int = None,
+        guidance_scale: float = None,
+        sampler: str = None
+    ):
         # Remove /generate prompt: from the prompt (Fix common mistake)
         transformed_prompt = re.sub(r'^/generate prompt:\s*', '', prompt)
 
@@ -175,7 +190,6 @@ class Sd(commands.Cog, name="sd"):
             error_prompt= True
 
         negative_prompt = negative_prompt or config['command_params']['default_negative']
-        aspect_ratio = aspect_ratio or config['command_params']['default_ratio']
         steps = steps or config['command_params']['default_steps']
         seed = seed or -1
         guidance_scale = guidance_scale or config['command_params']['default_cfg']
@@ -214,7 +228,6 @@ class Sd(commands.Cog, name="sd"):
 
         # Process request
         print(f'--- <Prompt>: ---\n{prompt}')
-        width, height = config['aspect_ratios'][aspect_ratio]
         queue_obj = AutoWebUi.QueueObj(
             event_loop=asyncio.get_event_loop(),
             ctx=ctx,
@@ -259,5 +272,74 @@ class Sd(commands.Cog, name="sd"):
         await ctx.send(f"**Copy paste the prompt of `{character}` below (you can also adjust to your likings):**")
         await ctx.channel.send(template_value)
 
+    @commands.hybrid_command(
+        name="generate_from_infotext", 
+        description="Generate an image from a .txt file or a text prompt"
+    )
+    @app_commands.describe(
+        file="The .txt file containing the prompt and other parameters",
+        text="The text prompt with parameters"
+    )
+    async def generate_from_infotext(
+        self, ctx: Context, 
+        file: discord.Attachment = None, 
+        text: str = None
+    ):
+        if not file and not text:
+            await ctx.send("Please provide either a .txt file or a text prompt.", ephemeral=True)
+            return
+        
+        if file:
+            content = await file.read()
+            content = content.decode("utf-8")
+        else:
+            content = text
+
+        params = self._parse_parameters(content)
+        
+        await self.generate_base(ctx, **params)
+
+    def _parse_parameters(self, content: str) -> dict:
+        params = {
+            'prompt': '',
+            'negative_prompt': None,
+            'width': None,
+            'height': None,
+            'steps': None,
+            'sampler': None,
+            'guidance_scale': None,
+            'seed': None,
+        }
+        
+        step_match = re.search(r"Steps:\s*(\d+)", content)
+        sampler_match = re.search(r"Sampler:\s*([\w\s]+)", content)
+        guidance_scale_match = re.search(r"CFG scale:\s*([\d\.]+)", content)
+        seed_match = re.search(r"Seed:\s*(\d+)", content)
+        size_match = re.search(r"Size:\s*(\d+)x(\d+)", content)
+
+        # Extracting negative prompt
+        negative_prompt_start = content.find("Negative prompt:") + len("Negative prompt:")
+        negative_prompt_end = content.find("Steps:")
+        negative_prompt = content[negative_prompt_start:negative_prompt_end].strip()
+        params['negative_prompt'] = negative_prompt
+        
+        # Update params dictionary if matches are found
+        if step_match:
+            params['steps'] = int(step_match.group(1))
+        if sampler_match:
+            params['sampler'] = sampler_match.group(1).strip()
+        if guidance_scale_match:
+            params['guidance_scale'] = float(guidance_scale_match.group(1))
+        if seed_match:
+            params['seed'] = int(seed_match.group(1))
+        if size_match:
+            params['width'] = int(size_match.group(1))
+            params['height'] = int(size_match.group(2))
+   
+        # Extract the prompt part
+        prompt_part = content.split("Negative prompt:")[0].strip()
+        params['prompt'] = prompt_part
+        return params
+        
 async def setup(bot) -> None:
     await bot.add_cog(Sd(bot))
