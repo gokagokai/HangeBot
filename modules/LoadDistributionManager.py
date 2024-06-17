@@ -28,6 +28,7 @@ def _worker(queue, ip, config):
                                               description=f'Status code: {status_code}\n{response}',
                                               color=0xff0000)
                         queue_obj.event_loop.create_task(queue_obj.ctx.channel.send(embed=embed))
+                        queue.popleft()
                         continue
                     embed = discord.Embed(description='**Enjoy!**', color=0xFFFFE0)
                     if queue_obj.ctx.author.avatar is None:
@@ -64,7 +65,6 @@ def _worker(queue, ip, config):
                             embed=embed
                         ))
                     
-                    # Pop the queue only after processing is successful
                     queue.popleft()
 
                 except:
@@ -76,6 +76,7 @@ def _worker(queue, ip, config):
                                               color=0xff0000)
                         # send the error to the user who requested the command that errored
                         queue_obj.event_loop.create_task(queue_obj.ctx.channel.send(embed=embed))
+                        queue.popleft()
                     else:
                         # otherwise print to console
                         print(tb)

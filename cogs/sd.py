@@ -195,6 +195,13 @@ class Sd(commands.Cog, name="sd"):
         guidance_scale = guidance_scale or config['command_params']['default_cfg']
         sampler = sampler or config['command_params']['default_sampler']
 
+        # Check if sampler is valid, otherwise use default sampler
+        valid_samplers = config['command_params']['samplers']
+        default_sampler_used = False
+        if sampler not in valid_samplers and sampler != None:
+            sampler = config['command_params']['default_sampler']
+            default_sampler_used = True
+
         # Check for banned words
         search = prompt if config['blacklist']['allow_in_negative'] else ' '.join([prompt, negative_prompt])
         for word in config['blacklist']['words']:
@@ -244,12 +251,14 @@ class Sd(commands.Cog, name="sd"):
         )
 
         response, info = self.load_distributor.add_to_queue(queue_obj)
+        response_message = f'`Queue Position: {info}`'
+        if error_prompt:
+            response_message += ' `Auto-Fix Prompt`'
+        if default_sampler_used:
+            response_message += f' `Default Sampler: {config["command_params"]["default_sampler"]}`'
 
         if response == LoadDistributionManager.Status.QUEUED:
-            if error_prompt:
-                await ctx.send(f'`Queue Position: {info}` `Auto-Fix Prompt`')
-            else:
-                await ctx.send(f'`Queue Position: {info}`')
+            await ctx.send(response_message)
         elif response == LoadDistributionManager.Status.IN_QUEUE:
             await ctx.send(f'**Chill bro I only have 1 GPU.**\n `Your Position: {info + 1}`', ephemeral=True)
         else:
@@ -274,7 +283,7 @@ class Sd(commands.Cog, name="sd"):
 
     @commands.hybrid_command(
         name="generate_from_infotext", 
-        description="Generate an image from a .txt file or a text prompt"
+        description="Generate an image from a .txt file or a text"
     )
     @app_commands.describe(
         file="The .txt file containing the prompt and other parameters",
@@ -312,7 +321,7 @@ class Sd(commands.Cog, name="sd"):
         }
         
         step_match = re.search(r"Steps:\s*(\d+)", content)
-        sampler_match = re.search(r"Sampler:\s*([\w\s]+)", content)
+        sampler_match = re.search(r"Sampler:\s*([a-zA-Z0-9\+\s]+)", content)
         guidance_scale_match = re.search(r"CFG scale:\s*([\d\.]+)", content)
         seed_match = re.search(r"Seed:\s*(\d+)", content)
         size_match = re.search(r"Size:\s*(\d+)x(\d+)", content)

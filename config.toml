@@ -13,12 +13,13 @@ default_ratio = '7:9'
 
 default_steps = 14
 min_steps = 5
-max_steps = 30
+max_steps = 50
 
 samplers = [
-            'Euler a', 'Euler', 'LMS', 'Heun', 'DPM2', 'DPM2 a', 'DPM++ 2S a', 'DPM++ 2M', 'DPM++ SDE', 'DPM fast',
-            'DPM adaptive', 'LMS Karras', 'DPM2 Karras', 'DPM2 a Karras', 'DPM++ 2M Karras', 'DPM++ SDE Karras',
-            'DDIM', 'PLMS'
+            'DPM++ 2M', 'DPM++ SDE', 'DPM++ 2M SDE', 'DPM++ 2M SDE Heun', 'DPM++ 2S a', 'DPM++ 3M SDE', 
+            'Euler a', 'Euler', 'LMS', 'Heun', 
+            'DPM2', 'DPM2 a', 'DPM fast', 'DPM adaptive',
+            'Restart', 'DDIM', 'PLMS', 'UniPC', 'LCM'
         ]
 models = ['']
 
@@ -68,3 +69,8 @@ allow_in_negative = true # allow blacklisted words in negative prompt
 'Ymir Fritz' = '/generate prompt: score_9, score_8_up, score_7_up, BREAK source_anime, <lora:Ymir Fritz-PonyXL-lora-faxtron:0.8> ymir fritz, blue eyes, blonde hair, long hair, medium breasts, armlet, bare shoulders, hairband, long white tunic'
 'Annie Leonhart' = '/generate prompt:score_9, score_8_up, score_7_up, BREAK source_anime, <lora:annie leonhardt-PonyXL-lora-Faxtron:0.8> annie leonhardt, single hair bun, white hoodie, open cropped brown jacket, white pants, thigh strap, survey corps \(emblem\), knee boots'
 'Sasha Braus' = '/generate prompt:score_9, score_8_up, score_7_up, BREAK source_anime, <lora:Sasha Blouse-PonyXL-lora-Faxtron:0.8> sasha blouse, brown eyes, brown hair, short ponytail, medium breasts, black pants, boots'
+'Pieck Finger' = '/generate prompt:score_9, score_8_up, score_7_up, score_6_up, score_5_up, score_4_up, BREAK, source_cartoon, source_anime, 1girl, pieck, pieckeldian, black hair, long hair, black eyes, armband, boots, breast pocket, brown jacket, long pleated skirt, closed mouth, collared shirt, long sleeves, hands on hips, standing, smile, looking at viewer, solo, simple background, white background <lora:PieckXL:1>'
+'Historia Reiss' = '/generate prompt: score_9, score_8_up, score_7_up, BREAK source_anime, <lora:historia reiss v2-PonyXL-lora-Faxtron:0.8> historia reiss, blue eyes, blonde hair, long hair, medium breasts, long brown dress, red cape, shoes guidance_scale: 2'
+'Rico Brzenska' = '/generate prompt: score_9, score_8_up, score_7_up, score_6_up, score_5_up, score_4_up, BREAK source_anime, <lora:Rico_Brzenska_PONY:1>,rico brzenska,1girl,solo,blue eyes,glasses,grey hair,short hair, jacket, paradis military uniform,training corps \(emblem\),Brown jacket, white pants steps: 11'
+'Petra Ral' = '/generate prompt: score_9, score_8_up, score_7_up, <lora:Petra_Ral_PONY:1>,petra ral, 1girl, solo, short hair, brown hair, brown eyes,paradis military uniform, shirt, long sleeves, training corps \(emblem\), white pants,thigh strap'
+'Firefly (Honkai: Star Rail)' = '/generate prompt: score_9, score_8_up, score_7_up, white background, simple background, BREAK source_anime, BREAK (1girl, solo, solo focus), fireflydef, jacket, dress, grey hair, <lora:Firefly-v2.5.3-PDXL:1>'
