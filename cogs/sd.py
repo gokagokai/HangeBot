@@ -35,6 +35,7 @@ class Sd(commands.Cog, name="sd"):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.channel.type.name != 'private':
+            # Delete image with reaction
             if message.author == self.bot.user:
                 try:
                     # Check if the message from Hange was actually a generation
@@ -43,6 +44,7 @@ class Sd(commands.Cog, name="sd"):
                 except:
                     pass
             
+            # Reply with @Hange to get metadata
             if message.reference and str(self.bot.user.id) in message.content:
                 original_message = await message.channel.fetch_message(message.reference.message_id)
                 if original_message.attachments:
@@ -53,6 +55,30 @@ class Sd(commands.Cog, name="sd"):
                             response, _ = webui.get_png_info(base64_string)
                             await self._send_embed_response(message, response, attachment)
 
+            # Copy Message Link to get metadada
+            if "https://discord.com/channels/" in message.content and not message.author.bot:
+                link_parts = message.content.split("/")
+                if len(link_parts) == 7:
+                    try:
+                        channel_id = int(link_parts[5])
+                        message_id = int(link_parts[6])
+                        print(channel_id, message_id)
+                        channel = self.bot.get_channel(channel_id)
+                        if channel:
+                            original_message = await channel.fetch_message(message_id)
+                            if original_message.attachments:
+                                for attachment in original_message.attachments:
+                                    print(attachment)
+                                    if attachment.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                                        base64_string = await self._download_and_encode_image(attachment.url)
+                                        webui = AutoWebUi.WebUi(self.ips[0])
+                                        response, _ = webui.get_png_info(base64_string)
+                                        await message.channel.send(message.content)
+                                        await self._send_embed_response(message, response, attachment)
+                                        await message.delete()
+                    except Exception as e:
+                        print(f"Error processing message link: {e}")
+
     async def _send_embed_response(self, message, response, attachment):
         embed = discord.Embed(color=0xFFFFE0)
         params = response.get('parameters', {})
@@ -61,6 +87,8 @@ class Sd(commands.Cog, name="sd"):
             embed.add_field(name='Prompt', value=params['Prompt'])
         if 'Negative prompt' in params:
             embed.add_field(name='Negative Prompt', value=params['Negative prompt'])
+        if 'Size-1' in params:
+            embed.add_field(name='Size', value=f"{params['Size-1']}x{params['Size-2']}")
         if 'Sampler' in params:
             embed.add_field(name='Sampler', value=params['Sampler'])
         if 'Schedule type' in params:
@@ -160,11 +188,12 @@ class Sd(commands.Cog, name="sd"):
         steps: app_commands.Range[int, config['command_params']['min_steps'], config['command_params']['max_steps']] = None,
         seed: int = None,
         guidance_scale: float = None,
-        sampler: str = None
+        sampler: str = None,
+        batch_size: app_commands.Range[int, 1,4] = 1,
     ):
         aspect_ratio = aspect_ratio or config['command_params']['default_ratio']
         width, height = config['aspect_ratios'][aspect_ratio]
-        await self.generate_base(ctx, prompt, negative_prompt, width, height, steps, seed, guidance_scale, sampler)
+        await self.generate_base(ctx, prompt, negative_prompt, width, height, steps, seed, guidance_scale, sampler, batch_size)
 
     async def generate_base(
         self, ctx: Context, 
@@ -175,7 +204,8 @@ class Sd(commands.Cog, name="sd"):
         steps: int = None,
         seed: int = None,
         guidance_scale: float = None,
-        sampler: str = None
+        sampler: str = None,
+        batch_size: int = None
     ):
         # Remove /generate prompt: from the prompt (Fix common mistake)
         transformed_prompt = re.sub(r'^/generate prompt:\s*', '', prompt)
@@ -246,7 +276,8 @@ class Sd(commands.Cog, name="sd"):
                 'height': height,
                 'seed': seed,
                 'cfg_scale': guidance_scale,
-                'sampler_index': sampler
+                'sampler_index': sampler,
+                'batch_size' : batch_size,
             }
         )
 
