@@ -62,7 +62,6 @@ class Sd(commands.Cog, name="sd"):
                     try:
                         channel_id = int(link_parts[5])
                         message_id = int(link_parts[6])
-                        print(channel_id, message_id)
                         channel = self.bot.get_channel(channel_id)
                         if channel:
                             original_message = await channel.fetch_message(message_id)
@@ -113,8 +112,9 @@ class Sd(commands.Cog, name="sd"):
                 icon_url=message.author.avatar.url
             )
 
-        await message.channel.send(attachment.url)
-        await message.channel.send(embed=embed)
+        await message.channel.send(
+            file=await attachment.to_file(),
+            embed=embed)
         
     async def _download_and_encode_image(self, url):
         async with self.session.get(url) as response:

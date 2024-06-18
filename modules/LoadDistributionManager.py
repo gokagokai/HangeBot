@@ -61,7 +61,7 @@ def _worker(queue, ip, config):
                         # Send the image
                         queue_obj.event_loop.create_task(queue_obj.ctx.channel.send(
                             content=f'<@{queue_obj.ctx.author.id}>',
-                            file=discord.File(fp=image_path, filename=f'image_{index+1}.png'),
+                            file=discord.File(fp=image_path, filename=f'{queue_obj.ctx.author.id}_{index+1}_{count}.png'),
                             embed=embed
                         ))
                     
